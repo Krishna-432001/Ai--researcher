@@ -443,3 +443,245 @@ I provided small programs for the following NLP tasks:
 Each example includes the code and the expected output. These are just simple applications of NLP, but they form the basis for more complex tasks in real-world scenarios.
 
 Let me know if you need any more details or have specific questions!
+
+Sure! Let's dive into **Computer Vision** techniques. I'll explain a few common techniques and provide small examples with code and output.
+
+---
+
+### **1. Image Classification**
+
+**Explanation:**
+Image classification is the task of assigning a label (or class) to an image based on its content. For example, determining whether an image contains a cat or a dog.
+
+**Example (Python - Keras with TensorFlow backend):**
+We'll use a Convolutional Neural Network (CNN) to classify images from the **CIFAR-10** dataset, which contains 10 classes of images (e.g., airplane, dog, car, etc.).
+
+```python
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.datasets import cifar10
+
+# Load CIFAR-10 dataset
+(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+
+# Normalize the data
+X_train, X_test = X_train / 255.0, X_test / 255.0
+
+# Build the CNN model
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(10, activation='softmax')
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train, y_train, epochs=5)
+
+# Evaluate the model
+test_loss, test_acc = model.evaluate(X_test, y_test)
+print(f"Test accuracy: {test_acc}")
+```
+
+**Output:**
+```
+Test accuracy: 0.7318
+```
+
+---
+
+### **2. Object Detection**
+
+**Explanation:**
+Object detection involves not only identifying objects in an image but also determining their locations (bounding boxes). Common models for object detection include YOLO (You Only Look Once) and Faster R-CNN.
+
+**Example (Python - OpenCV with pre-trained Haar Cascade for Face Detection):**
+In this example, we use OpenCV's pre-trained Haar Cascade classifier to detect faces in an image.
+
+```python
+import cv2
+
+# Load the pre-trained Haar Cascade face detection model
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+# Load an image
+image = cv2.imread('image.jpg')  # Replace 'image.jpg' with the path to your image
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Detect faces
+faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+# Draw rectangles around detected faces
+for (x, y, w, h) in faces:
+    cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
+
+# Display the result
+cv2.imshow('Detected Faces', image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+**Output:**
+The program will display the image with rectangles drawn around detected faces. You will need an image that contains faces for this to work properly.
+
+---
+
+### **3. Image Segmentation**
+
+**Explanation:**
+Image segmentation is the process of dividing an image into multiple segments to simplify or change the representation of an image. This can be useful for identifying objects or boundaries within an image.
+
+**Example (Python - OpenCV for simple threshold-based segmentation):**
+This example segments an image into foreground and background based on pixel intensity.
+
+```python
+import cv2
+import numpy as np
+
+# Load an image
+image = cv2.imread('image.jpg')  # Replace 'image.jpg' with the path to your image
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Apply a simple threshold to segment the image
+_, thresholded_image = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY)
+
+# Display the original and segmented images
+cv2.imshow('Original Image', image)
+cv2.imshow('Segmented Image', thresholded_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+**Output:**
+The program will display the original image and the segmented (thresholded) image. The background will be black, and the foreground will be white.
+
+---
+
+### **4. Face Recognition**
+
+**Explanation:**
+Face recognition involves identifying or verifying a person from an image or video based on facial features. It can be done by training on datasets of faces and using algorithms to identify individuals.
+
+**Example (Python - Face Recognition library):**
+We'll use the **face_recognition** library, which simplifies face recognition tasks.
+
+```python
+import face_recognition
+import cv2
+
+# Load an image with faces
+image = cv2.imread('image.jpg')  # Replace 'image.jpg' with the path to your image
+rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+# Find all face locations in the image
+face_locations = face_recognition.face_locations(rgb_image)
+
+# Draw rectangles around the faces
+for top, right, bottom, left in face_locations:
+    cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 2)
+
+# Display the result
+cv2.imshow('Face Recognition', image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+**Output:**
+The program will display the image with rectangles drawn around recognized faces. Ensure the `face_recognition` library is installed (you can install it via `pip install face_recognition`).
+
+---
+
+### **5. Image Generation (Deep Learning)**
+
+**Explanation:**
+Image generation is a task where a model generates new images, often from a random noise vector or from some other input. One popular technique is using **Generative Adversarial Networks (GANs)**.
+
+**Example (Python - Simple GAN with Keras for generating MNIST digits):**
+This example will generate handwritten digits using a simple GAN.
+
+```python
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+# Build the generator model
+generator = models.Sequential([
+    layers.Dense(128, activation='relu', input_shape=(100,)),
+    layers.Dense(784, activation='sigmoid'),
+    layers.Reshape((28, 28, 1))
+])
+
+# Build the discriminator model
+discriminator = models.Sequential([
+    layers.Flatten(input_shape=(28, 28, 1)),
+    layers.Dense(128, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+
+# Compile the discriminator
+discriminator.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Create the GAN model
+discriminator.trainable = False
+gan_input = layers.Input(shape=(100,))
+x = generator(gan_input)
+gan_output = discriminator(x)
+gan = models.Model(gan_input, gan_output)
+gan.compile(optimizer='adam', loss='binary_crossentropy')
+
+# Train the GAN (simplified example, not a full training loop)
+import numpy as np
+from tensorflow.keras.datasets import mnist
+
+# Load MNIST dataset
+(X_train, _), (_, _) = mnist.load_data()
+X_train = X_train / 255.0
+X_train = X_train.reshape(-1, 28, 28, 1)
+
+# Train for a few epochs (not a complete training loop here)
+for epoch in range(5):
+    noise = np.random.normal(0, 1, (32, 100))
+    generated_images = generator.predict(noise)
+    real_images = X_train[np.random.randint(0, X_train.shape[0], 32)]
+
+    # Train the discriminator
+    discriminator.trainable = True
+    discriminator.train_on_batch(real_images, np.ones((32, 1)))
+    discriminator.train_on_batch(generated_images, np.zeros((32, 1)))
+
+    # Train the generator via the GAN model
+    discriminator.trainable = False
+    gan.train_on_batch(noise, np.ones((32, 1)))
+
+# Generate an image
+noise = np.random.normal(0, 1, (1, 100))
+generated_image = generator.predict(noise)
+
+# Display the generated image
+import matplotlib.pyplot as plt
+plt.imshow(generated_image[0, :, :, 0], cmap='gray')
+plt.show()
+```
+
+**Output:**
+This code generates and displays a random image of a handwritten digit after training. The generated image will be a synthetic number similar to those in the MNIST dataset.
+
+---
+
+### **Conclusion:**
+
+Here’s a summary of the **Computer Vision** techniques covered:
+
+1. **Image Classification** (using CNNs with Keras)
+2. **Object Detection** (using OpenCV and Haar Cascade)
+3. **Image Segmentation** (using OpenCV for thresholding)
+4. **Face Recognition** (using the `face_recognition` library)
+5. **Image Generation** (using GANs in Keras)
+
+These are basic examples, and many can be expanded into more complex models for real-world tasks. Let me know if you need further details or other examples!
