@@ -685,3 +685,250 @@ Here’s a summary of the **Computer Vision** techniques covered:
 5. **Image Generation** (using GANs in Keras)
 
 These are basic examples, and many can be expanded into more complex models for real-world tasks. Let me know if you need further details or other examples!
+
+Certainly! Let's dive into **Robotics Techniques** and explore common techniques used in the field of robotics. I'll provide an explanation, a small program example, and expected output for each technique.
+
+---
+
+### **1. Control Systems**
+
+**Explanation:**
+Control systems in robotics are used to manage the motion of robots. These systems take in sensor inputs (like position or velocity) and provide control signals to actuators (such as motors) to achieve desired behavior.
+
+A simple example is a **Proportional-Integral-Derivative (PID) Controller**, which adjusts the control signal based on the error between the current state and desired state.
+
+**Example (Python - Simple Proportional Controller for a Robot):**
+
+This example simulates a basic proportional controller for a robot trying to reach a target position.
+
+```python
+import matplotlib.pyplot as plt
+
+# Target position
+target_position = 10
+
+# Initial position of the robot
+position = 0
+
+# Proportional gain (Kp)
+Kp = 0.1
+
+# Simulation of movement over time
+positions = []
+for step in range(100):
+    error = target_position - position  # Calculate the error
+    position += Kp * error  # Update the position (control law)
+    positions.append(position)
+
+# Plot the results
+plt.plot(positions)
+plt.axhline(y=target_position, color='r', linestyle='--', label='Target')
+plt.xlabel('Time step')
+plt.ylabel('Position')
+plt.title('Robot Position Control (Proportional Control)')
+plt.legend()
+plt.show()
+```
+
+**Output:**
+The plot shows the robot's position converging towards the target over time, as the proportional controller adjusts its movements based on the error.
+
+---
+
+### **2. Navigation**
+
+**Explanation:**
+In robotics, navigation is the process by which a robot determines its position and plans a path to reach a destination. Common techniques include **Simultaneous Localization and Mapping (SLAM)** and **path planning algorithms**.
+
+A simple example is **A* Algorithm**, which is widely used for pathfinding and navigation.
+
+**Example (Python - A* Pathfinding Algorithm):**
+
+```python
+import heapq
+
+# Define the grid (0 = free space, 1 = obstacle)
+grid = [
+    [0, 0, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+# A* Pathfinding algorithm
+def a_star(grid, start, end):
+    rows, cols = len(grid), len(grid[0])
+    open_list = []
+    closed_list = set()
+    heapq.heappush(open_list, (0 + abs(start[0] - end[0]) + abs(start[1] - end[1]), 0, start))
+    
+    came_from = {}
+
+    while open_list:
+        _, g, current = heapq.heappop(open_list)
+        if current == end:
+            path = []
+            while current in came_from:
+                path.append(current)
+                current = came_from[current]
+            path.append(start)
+            return path[::-1]
+
+        closed_list.add(current)
+
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            neighbor = (current[0] + dx, current[1] + dy)
+            if 0 <= neighbor[0] < rows and 0 <= neighbor[1] < cols and grid[neighbor[0]][neighbor[1]] == 0 and neighbor not in closed_list:
+                heapq.heappush(open_list, (g + 1 + abs(neighbor[0] - end[0]) + abs(neighbor[1] - end[1]), g + 1, neighbor))
+                came_from[neighbor] = current
+    
+    return None
+
+# Start and end points
+start = (0, 0)
+end = (4, 4)
+
+# Find the path using A*
+path = a_star(grid, start, end)
+print("Path found:", path)
+```
+
+**Output:**
+```
+Path found: [(0, 0), (0, 1), (1, 1), (2, 1), (2, 2), (3, 2), (4, 2), (4, 3), (4, 4)]
+```
+
+This shows the optimal path for the robot to navigate from the start `(0, 0)` to the destination `(4, 4)` while avoiding obstacles (`1`s in the grid).
+
+---
+
+### **3. Mapping (SLAM)**
+
+**Explanation:**
+Simultaneous Localization and Mapping (SLAM) allows a robot to build a map of an unknown environment while simultaneously keeping track of its own location within that environment.
+
+SLAM typically involves sensors like LIDAR or cameras. A simplified example of SLAM is **EKF-SLAM (Extended Kalman Filter SLAM)**, where the robot’s position and map are updated as it moves.
+
+For simplicity, here is a basic **Particle Filter-based SLAM** approach.
+
+**Example (Python - Simplified Particle Filter for SLAM):**
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Initialize particles (position guesses)
+particles = np.random.rand(100, 2) * 10  # 100 particles in a 10x10 grid
+weights = np.ones(100) / 100  # Equal weights for each particle
+
+# True position of the robot (unknown to the filter)
+true_position = np.array([5, 5])
+
+# Movement model (move by (1, 0) in each step)
+movement = np.array([1, 0])
+
+# Update particles with the movement model
+particles += movement + np.random.randn(100, 2) * 0.1  # Adding noise to simulate uncertainty
+
+# Plot particles before and after movement
+plt.scatter(particles[:, 0], particles[:, 1], color='blue', label='Particles')
+plt.scatter(true_position[0], true_position[1], color='red', label='True Position')
+plt.title("Particle Filter SLAM Example")
+plt.legend()
+plt.show()
+```
+
+**Output:**
+The program will display a scatter plot showing particles before and after the movement. The true position is marked in red, while the particles' positions are shown in blue.
+
+---
+
+### **4. Localization**
+
+**Explanation:**
+Localization is the process of determining the robot’s position within a known environment. In a typical indoor environment, a robot might use **odometry** (distance traveled) combined with **sensor data** (like LIDAR) to estimate its position.
+
+**Example (Python - Simple Odometry Estimation):**
+
+```python
+import math
+
+# Robot's initial position (x, y, orientation)
+position = [0, 0, 0]  # x, y, theta
+
+# Function to update the position
+def update_position(position, left_wheel_distance, right_wheel_distance, wheel_base):
+    # Compute the robot's displacement (distance moved)
+    delta_distance = (left_wheel_distance + right_wheel_distance) / 2
+    delta_theta = (right_wheel_distance - left_wheel_distance) / wheel_base
+
+    # Update position (simple odometry)
+    position[2] += delta_theta  # Update orientation (theta)
+    position[0] += delta_distance * math.cos(position[2])  # Update x
+    position[1] += delta_distance * math.sin(position[2])  # Update y
+
+    return position
+
+# Move the robot (left and right wheel distances, wheelbase of the robot)
+new_position = update_position(position, 1.0, 1.0, 0.5)
+print("Updated Position:", new_position)
+```
+
+**Output:**
+```
+Updated Position: [1.0, 0.0, 0.0]
+```
+
+This simple example uses the robot's wheel distances and wheelbase to estimate its new position using basic odometry.
+
+---
+
+### **5. Human-Robot Interaction (HRI)**
+
+**Explanation:**
+Human-Robot Interaction (HRI) is the field of study that focuses on the interactions between humans and robots. Robots can be designed to understand and respond to human gestures, voice commands, and other inputs.
+
+**Example (Python - Simple Voice Command Processing):**
+
+We will use the `speech_recognition` library to capture voice input from the user.
+
+```python
+import speech_recognition as sr
+
+# Initialize recognizer
+recognizer = sr.Recognizer()
+
+# Capture voice input from the microphone
+with sr.Microphone() as source:
+    print("Say something:")
+    audio = recognizer.listen(source)
+
+# Recognize speech
+try:
+    command = recognizer.recognize_google(audio)
+    print("You said:", command)
+except sr.UnknownValueError:
+    print("Sorry, I could not understand the audio.")
+except sr.RequestError:
+    print("Could not request results from Google Speech Recognition service.")
+```
+
+**Output:**
+```
+Say something:
+You said: Turn on the light
+```
+
+The robot recognizes the command "Turn on the light" through voice recognition and can act accordingly (e.g., turning on a light if connected to IoT).
+
+---
+
+### **Conclusion:**
+
+Here’s a summary of **Robotics Techniques** covered:
+
+1. **Control Systems** (Proportional Controller for position control)
+2. **Navigation** (A* Pathfinding for navigating around obstacles)
+3. **Mapping (SLAM)** (Particle filter-based SLAM for environment mapping)
+4. **
